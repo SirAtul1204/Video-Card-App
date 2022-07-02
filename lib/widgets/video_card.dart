@@ -28,22 +28,19 @@ class _VideoCardState extends State<VideoCard> {
     super.initState();
     _controller = VideoPlayerController.network(widget.videoUrl)
       ..initialize().then((_) {
-        _controller!.setVolume(0);
-        _controller!.play();
-
         setState(() {});
       });
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    setState(() {
-      if (widget.isPlaying) {
-        _controller!.setVolume(0);
-        _controller!.play();
-      }
-    });
+  void didUpdateWidget(covariant VideoCard oldWidget) {
+    if (widget.isPlaying) {
+      _controller!.setVolume(0);
+      _controller!.play();
+    } else {
+      _controller!.pause();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
