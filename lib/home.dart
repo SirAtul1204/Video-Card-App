@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:manthan_video_card_app/widgets/video_card.dart';
-import 'package:visibility_detector/visibility_detector.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -31,20 +31,6 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void handleVisibilityChange(VisibilityInfo visibilityInfo, int index) {
-    if (visibilityInfo.visibleFraction == 1) {
-      visibleIndexes.add(index);
-    } else {
-      visibleIndexes.remove(index);
-    }
-
-    visibleIndexes.sort();
-
-    setState(() {
-      _currentPlaying = visibleIndexes[0];
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,11 +46,14 @@ class _HomeState extends State<Home> {
             height: MediaQuery.of(context).size.height,
             child: Padding(
               padding: const EdgeInsets.all(4.0),
-              child: ListView.builder(
+              child: InViewNotifierList(
                   itemCount: _cards.length,
-                  itemBuilder: itemBuilder,
-                  addRepaintBoundaries: true,
-                  addAutomaticKeepAlives: true),
+                  builder: itemBuilder,
+                  isInViewPortCondition: (double deltaTop, double deltaBottom,
+                      double viewPortDimension) {
+                    return (deltaTop < (0.3 * viewPortDimension) &&
+                        (deltaBottom < (0.5 * viewPortDimension)));
+                  }),
             )),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -86,20 +75,19 @@ class _HomeState extends State<Home> {
   }
 
   Widget itemBuilder(BuildContext context, int index) {
-    return VisibilityDetector(
-      key: ValueKey(_cards[index]["id"]),
-      onVisibilityChanged: (visibilityInfo) =>
-          handleVisibilityChange(visibilityInfo, index),
-      child: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: VideoCard(
-          id: _cards[index]["id"],
-          title: _cards[index]["title"],
-          videoUrl: _cards[index]["videoUrl"],
-          coverPicture: _cards[index]["coverPicture"],
-          isPlaying: _currentPlaying == index ? true : false,
-        ),
-      ),
-    );
+    return InViewNotifierWidget(
+        id: "$index",
+        builder: (BuildContext context, bool isInView, Widget? child) {
+          print(isInView);
+          return Padding(
+              padding: const EdgeInsets.all(5.0),
+              child: VideoCard(
+                id: _cards[index]["id"],
+                title: _cards[index]["title"],
+                videoUrl: _cards[index]["videoUrl"],
+                coverPicture: _cards[index]["coverPicture"],
+                isPlaying: isInView,
+              ));
+        });
   }
 }

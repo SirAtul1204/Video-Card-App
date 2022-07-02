@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import "dart:math";
 
 class VideoCard extends StatefulWidget {
   final int id;
@@ -22,6 +23,8 @@ class VideoCard extends StatefulWidget {
 
 class _VideoCardState extends State<VideoCard> {
   VideoPlayerController? _controller;
+  int _likes = Random().nextInt(10);
+  int _dislikes = Random().nextInt(10);
 
   @override
   void initState() {
@@ -44,6 +47,12 @@ class _VideoCardState extends State<VideoCard> {
   }
 
   @override
+  void dispose() {
+    _controller!.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 5.0,
@@ -63,18 +72,64 @@ class _VideoCardState extends State<VideoCard> {
                         aspectRatio: _controller!.value.aspectRatio,
                         child: VideoPlayer(_controller!),
                       )
-                    : Image(
-                        image:
-                            NetworkImage("${widget.coverPicture}#${widget.id}"),
-                        key: ValueKey(widget.id),
+                    : SizedBox(
+                        width: 800,
+                        height: 200,
+                        child: Image(
+                          image: NetworkImage(
+                              "${widget.coverPicture}#${widget.id}"),
+                          key: ValueKey(widget.id),
+                        ),
                       ),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 8, bottom: 8),
-                child: Text(
-                  widget.title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Image(
+                            image: AssetImage("assets/logo.jpg"), width: 40),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20),
+                          child: Text(
+                            widget.title,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.thumb_up),
+                          color: Colors.green,
+                          onPressed: () {
+                            setState(() {
+                              _likes += 1;
+                            });
+                          },
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 1, right: 6),
+                          child: Text("$_likes"),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.thumb_down),
+                          color: Colors.red,
+                          onPressed: () {
+                            setState(() {
+                              _dislikes += 1;
+                            });
+                          },
+                        ),
+                        Text("$_dislikes"),
+                      ],
+                    )
+                  ],
                 ),
               ),
             ],
