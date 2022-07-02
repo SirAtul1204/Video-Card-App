@@ -36,7 +36,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 23, 2, 132),
-        title: const Text("Video Card App"),
+        title: const Text("Video App"),
       ),
       body: SafeArea(
         child: Container(
